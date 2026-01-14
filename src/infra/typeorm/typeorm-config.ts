@@ -1,6 +1,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Patient } from 'src/app/modules/patient/entities/patient.entity';
 import { ormEnvConfig } from '../../environment';
+import { Note } from 'src/app/modules/note/entities/note.entity';
 
 export const getTypeormConfig = (): TypeOrmModuleOptions => {
     console.log(ormEnvConfig);
@@ -11,7 +12,7 @@ export const getTypeormConfig = (): TypeOrmModuleOptions => {
         username: ormEnvConfig.USERNAME,
         password: ormEnvConfig.PASSWORD,
         database: ormEnvConfig.DATABASE,
-        entities: [Patient],
+        entities: [Patient, Note],
         migrations: [__dirname + '/migrations/*{.ts,.js}'],
         migrationsRun: false,
         synchronize: false,

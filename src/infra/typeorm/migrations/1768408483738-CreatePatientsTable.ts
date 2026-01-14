@@ -9,7 +9,7 @@ export class CreatePatientsTable1768408483738 implements MigrationInterface {
         `);
 
         await queryRunner.query(`
-            CREATE TYPE "patients_gender_enum" AS ENUM ('male', 'female', 'other');
+            CREATE TYPE "patients_gender_enum" AS ENUM ('MALE', 'FEMALE', 'OTHER');
         `);
 
         await queryRunner.createTable(
@@ -71,7 +71,7 @@ export class CreatePatientsTable1768408483738 implements MigrationInterface {
 
         await queryRunner.query(`
             ALTER TABLE "patients" 
-            ALTER COLUMN "gender" SET DEFAULT 'other'::patients_gender_enum;
+            ALTER COLUMN "gender" SET DEFAULT 'OTHER'::patients_gender_enum;
         `);
     }
 

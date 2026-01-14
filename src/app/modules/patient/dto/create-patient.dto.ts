@@ -34,12 +34,12 @@ export class CreatePatientDto {
 
     @ApiPropertyOptional({
         description: 'Patient gender',
-        example: 'male',
+        example: 'MALE',
         enum: Gender,
         default: 'other',
     })
     @IsOptional()
-    @IsEnum(Gender, { message: 'Gender must be one of: male, female, other' })
+    @IsEnum(Gender, { message: 'Gender must be one of: MALE, FEMALE, OTHER' })
     gender?: Gender;
 
     @ApiProperty({
