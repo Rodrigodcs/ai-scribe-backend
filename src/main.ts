@@ -25,6 +25,8 @@ async function bootstrap() {
     .setTitle('AI Scribe Notes Management API')
     .setDescription('API for managing AI-generated clinical notes')
     .setVersion('1.0')
+    .addTag('health', 'Health related operations')
+    .addTag('patients', 'Patient related operations')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
