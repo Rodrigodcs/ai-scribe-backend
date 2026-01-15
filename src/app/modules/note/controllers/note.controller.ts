@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
     HttpCode,
     HttpStatus,
@@ -16,6 +17,8 @@ import {
     ApiBody,
     ApiConsumes,
     ApiCreatedResponse,
+    ApiNoContentResponse,
+    ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiParam,
@@ -30,6 +33,7 @@ import { Note } from '../entities/note.entity';
 import { CreateAudioNoteService } from '../services/create-audio-note.service';
 import { CreateTextNoteService } from '../services/create-text-note.service';
 import { FindAllNotesService } from '../services/find-all-notes.service';
+import { RemoveNoteService } from '../services/remove-note.service';
 import { UpdateAudioNoteService } from '../services/update-audio-note.service';
 import { UpdateTextNoteService } from '../services/update-text-note.service';
 
@@ -42,6 +46,7 @@ export class NoteController {
         private readonly updateTextNoteService: UpdateTextNoteService,
         private readonly createAudioNoteService: CreateAudioNoteService,
         private readonly updateAudioNoteService: UpdateAudioNoteService,
+        private readonly removeNoteService: RemoveNoteService,
     ) { }
 
     @Get()
@@ -130,5 +135,15 @@ export class NoteController {
         @UploadedFile() file: { buffer: Buffer; filename: string; mimetype: string } | undefined,
     ) {
         return await this.updateAudioNoteService.run(id, file);
+    }
+
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Remove a note' })
+    @ApiParam({ name: 'id', description: 'Note ID (UUID)' })
+    @ApiNoContentResponse({ description: 'Note removed successfully' })
+    @ApiNotFoundResponse({ description: 'Note not found' })
+    async remove(@Param('id') id: string) {
+        await this.removeNoteService.run(id);
     }
 }

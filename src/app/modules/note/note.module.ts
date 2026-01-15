@@ -10,8 +10,9 @@ import { CreateAudioNoteService } from './services/create-audio-note.service';
 import { CreateTextNoteService } from './services/create-text-note.service';
 import { FindAllNotesService } from './services/find-all-notes.service';
 import { FindOneNoteService } from './services/find-one-note.service';
-import { UpdateTextNoteService } from './services/update-text-note.service';
 import { UpdateAudioNoteService } from './services/update-audio-note.service';
+import { UpdateTextNoteService } from './services/update-text-note.service';
+import { RemoveNoteService } from './services/remove-note.service';
 
 @Module({
     imports: [
@@ -28,6 +29,7 @@ import { UpdateAudioNoteService } from './services/update-audio-note.service';
         UpdateTextNoteService,
         CreateAudioNoteService,
         UpdateAudioNoteService,
+        RemoveNoteService,
     ],
     exports: [],
 })
