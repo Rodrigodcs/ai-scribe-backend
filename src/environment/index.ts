@@ -20,3 +20,7 @@ export const ormEnvConfig = {
     DATABASE: process.env.TYPEORM_DATABASE,
     PORT: process.env.TYPEORM_PORT,
 };
+
+export const openaiEnvConfig = {
+    API_KEY: process.env.OPENAI_API_KEY ?? '',
+};

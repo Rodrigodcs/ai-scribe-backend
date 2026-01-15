@@ -1,9 +1,14 @@
 import {
+    Body,
     Controller,
     Get,
+    HttpCode,
+    HttpStatus,
+    Post,
     Query,
 } from '@nestjs/common';
 import {
+    ApiCreatedResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
@@ -12,6 +17,7 @@ import { PaginatedResponseDto } from '../../../../shared/dto/paginated-response.
 import { FindAllNotesDto } from '../dto/find-all-notes.dto';
 import { Note } from '../entities/note.entity';
 import { FindAllNotesService } from '../services/find-all-notes.service';
+import { CreateNoteDto } from '../dto/create-note.dto';
 
 @ApiTags('notes')
 @Controller('notes')
@@ -31,5 +37,16 @@ export class NoteController {
     })
     async findAll(@Query() findAllNotesDto: FindAllNotesDto): Promise<PaginatedResponseDto<Note>> {
         return await this.findAllNotesService.run(findAllNotesDto);
+    }
+
+    @Post()
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Create a new note with text' })
+    @ApiCreatedResponse({
+        description: 'Note created successfully',
+        type: Note,
+    })
+    async create(@Body() createNoteDto: CreateNoteDto) {
+        return
     }
 }
