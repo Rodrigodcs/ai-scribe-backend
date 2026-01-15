@@ -33,6 +33,7 @@ import { Note } from '../entities/note.entity';
 import { CreateAudioNoteService } from '../services/create-audio-note.service';
 import { CreateTextNoteService } from '../services/create-text-note.service';
 import { FindAllNotesService } from '../services/find-all-notes.service';
+import { FindOneNoteService } from '../services/find-one-note.service';
 import { RemoveNoteService } from '../services/remove-note.service';
 import { UpdateAudioNoteService } from '../services/update-audio-note.service';
 import { UpdateTextNoteService } from '../services/update-text-note.service';
@@ -47,6 +48,7 @@ export class NoteController {
         private readonly createAudioNoteService: CreateAudioNoteService,
         private readonly updateAudioNoteService: UpdateAudioNoteService,
         private readonly removeNoteService: RemoveNoteService,
+        private readonly findOneNoteService: FindOneNoteService,
     ) { }
 
     @Get()
@@ -60,6 +62,18 @@ export class NoteController {
     })
     async findAll(@Query() findAllNotesDto: FindAllNotesDto): Promise<PaginatedResponseDto<Note>> {
         return await this.findAllNotesService.run(findAllNotesDto);
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: 'Find a note by ID' })
+    @ApiParam({ name: 'id', description: 'Note ID (UUID)' })
+    @ApiOkResponse({
+        description: 'Note found',
+        type: Note,
+    })
+    @ApiNotFoundResponse({ description: 'Note not found' })
+    async findOne(@Param('id') id: string) {
+        return await this.findOneNoteService.run(id);
     }
 
     @Post('text')
