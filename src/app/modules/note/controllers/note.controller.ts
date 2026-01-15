@@ -8,8 +8,13 @@ import {
     Patch,
     Post,
     Query,
+    UploadedFile,
+    UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
+    ApiBody,
+    ApiConsumes,
     ApiCreatedResponse,
     ApiOkResponse,
     ApiOperation,
@@ -17,6 +22,7 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { PaginatedResponseDto } from '../../../../shared/dto/paginated-response.dto';
+import { CreateAudioNoteDto } from '../dto/create-audio-note.dto';
 import { CreateTextNoteDto } from '../dto/create-text-note.dto';
 import { FindAllNotesDto } from '../dto/find-all-notes.dto';
 import { UpdateTextNoteDto } from '../dto/update-text-note.dto';
@@ -24,6 +30,7 @@ import { Note } from '../entities/note.entity';
 import { CreateTextNoteService } from '../services/create-text-note.service';
 import { FindAllNotesService } from '../services/find-all-notes.service';
 import { UpdateTextNoteService } from '../services/update-text-note.service';
+import { CreateAudioNoteService } from '../services/create-audio-note.service';
 
 @ApiTags('notes')
 @Controller('notes')
@@ -32,6 +39,7 @@ export class NoteController {
         private readonly findAllNotesService: FindAllNotesService,
         private readonly createTextNoteService: CreateTextNoteService,
         private readonly updateTextNoteService: UpdateTextNoteService,
+        private readonly createAudioNoteService: CreateAudioNoteService,
     ) { }
 
     @Get()
@@ -70,5 +78,38 @@ export class NoteController {
         @Body() updateTextNoteDto: UpdateTextNoteDto
     ) {
         return await this.updateTextNoteService.run(id, updateTextNoteDto);
+    }
+
+    @Post('audio')
+    @HttpCode(HttpStatus.CREATED)
+    @UseInterceptors(FileInterceptor('audio'))
+    @ApiConsumes('multipart/form-data')
+    @ApiOperation({ summary: 'Create a new note with audio' })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                patientId: {
+                    type: 'string',
+                    format: 'uuid',
+                    description: 'Patient ID',
+                },
+                audio: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'Audio file to transcribe',
+                },
+            },
+        },
+    })
+    @ApiCreatedResponse({
+        description: 'Note created successfully from audio',
+        type: Note,
+    })
+    async createAudioNote(
+        @Body() createAudioNoteDto: CreateAudioNoteDto,
+        @UploadedFile() file: { buffer: Buffer; filename: string } | undefined,
+    ) {
+        return await this.createAudioNoteService.run(createAudioNoteDto, file);
     }
 }
