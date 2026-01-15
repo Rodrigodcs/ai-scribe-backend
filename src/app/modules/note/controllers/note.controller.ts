@@ -27,10 +27,11 @@ import { CreateTextNoteDto } from '../dto/create-text-note.dto';
 import { FindAllNotesDto } from '../dto/find-all-notes.dto';
 import { UpdateTextNoteDto } from '../dto/update-text-note.dto';
 import { Note } from '../entities/note.entity';
+import { CreateAudioNoteService } from '../services/create-audio-note.service';
 import { CreateTextNoteService } from '../services/create-text-note.service';
 import { FindAllNotesService } from '../services/find-all-notes.service';
+import { UpdateAudioNoteService } from '../services/update-audio-note.service';
 import { UpdateTextNoteService } from '../services/update-text-note.service';
-import { CreateAudioNoteService } from '../services/create-audio-note.service';
 
 @ApiTags('notes')
 @Controller('notes')
@@ -40,6 +41,7 @@ export class NoteController {
         private readonly createTextNoteService: CreateTextNoteService,
         private readonly updateTextNoteService: UpdateTextNoteService,
         private readonly createAudioNoteService: CreateAudioNoteService,
+        private readonly updateAudioNoteService: UpdateAudioNoteService,
     ) { }
 
     @Get()
@@ -108,8 +110,25 @@ export class NoteController {
     })
     async createAudioNote(
         @Body() createAudioNoteDto: CreateAudioNoteDto,
-        @UploadedFile() file: { buffer: Buffer; filename: string } | undefined,
+        @UploadedFile() file: { buffer: Buffer; filename: string; mimetype: string } | undefined,
     ) {
         return await this.createAudioNoteService.run(createAudioNoteDto, file);
+    }
+
+    @Patch('audio/:id')
+    @HttpCode(HttpStatus.OK)
+    @UseInterceptors(FileInterceptor('audio'))
+    @ApiConsumes('multipart/form-data')
+    @ApiOperation({ summary: 'Update a note with audio' })
+    @ApiParam({ name: 'id', description: 'Note ID (UUID)' })
+    @ApiOkResponse({
+        description: 'Audio note updated successfully',
+        type: Note,
+    })
+    async updateAudioNote(
+        @Param('id') id: string,
+        @UploadedFile() file: { buffer: Buffer; filename: string; mimetype: string } | undefined,
+    ) {
+        return await this.updateAudioNoteService.run(id, file);
     }
 }

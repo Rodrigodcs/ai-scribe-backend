@@ -5,29 +5,32 @@ import { Repository } from 'typeorm';
 import { S3UploadService } from '../../aws/services/s3-upload.service';
 import { SoapFormattingService } from '../../openai/services/soap-formatting.service';
 import { TranscriptionService } from '../../openai/services/transcription.service';
-import { FindOnePatientService } from '../../patient/services/find-one-patient.service';
-import { CreateAudioNoteDto } from '../dto/create-audio-note.dto';
 import { InputType, Note } from '../entities/note.entity';
+import { FindOneNoteService } from './find-one-note.service';
 
 @Injectable()
-export class CreateAudioNoteService {
+export class UpdateAudioNoteService {
     constructor(
         @InjectRepository(Note)
         private readonly noteRepository: Repository<Note>,
-        private readonly findOnePatientService: FindOnePatientService,
+        private readonly findOneNoteService: FindOneNoteService,
         private readonly transcriptionService: TranscriptionService,
         private readonly soapFormattingService: SoapFormattingService,
         private readonly s3UploadService: S3UploadService,
     ) { }
 
-    async run(createAudioNoteDto: CreateAudioNoteDto, file: { buffer: Buffer; mimetype: string } | undefined) {
-        const patient = await this.findOnePatientService.run(createAudioNoteDto.patientId);
+    async run(id: string, file: { buffer: Buffer; mimetype: string } | undefined) {
+        const note = await this.findOneNoteService.run(id);
+
+        if (note.inputType === InputType.TEXT) {
+            throw new BadRequestException('Note is already a text note');
+        }
 
         if (!file || !file.buffer) {
             throw new BadRequestException('Audio file is required');
         }
 
-        const filename = generateAudioFilename(patient.name, file.mimetype);
+        const filename = generateAudioFilename(note.patient.name, file.mimetype);
 
         const audioUrl = await this.s3UploadService.uploadAudio(
             file.buffer,
@@ -35,17 +38,17 @@ export class CreateAudioNoteService {
             file.mimetype,
         );
 
+        if (note.audioUrl) {
+            await this.s3UploadService.deleteAudio(note.audioUrl);
+        }
+
         const transcription = await this.transcriptionService.transcribe(file.buffer);
 
         const content = await this.soapFormattingService.formatToSoap(transcription);
 
-        const note = this.noteRepository.create({
-            patientId: createAudioNoteDto.patientId,
-            transcription,
-            content,
-            inputType: InputType.AUDIO,
-            audioUrl,
-        });
+        note.transcription = transcription;
+        note.content = content;
+        note.audioUrl = audioUrl;
 
         return await this.noteRepository.save(note);
     }

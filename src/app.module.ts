@@ -4,6 +4,7 @@ import { NoteModule } from './app/modules/note/note.module';
 import { OpenAiModule } from './app/modules/openai/aponai.module';
 import { PatientModule } from './app/modules/patient/patient.module';
 import { TypeormModule } from './infra/typeorm/typeorm.module';
+import { AwsModule } from './app/modules/aws/aws.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { TypeormModule } from './infra/typeorm/typeorm.module';
     PatientModule,
     NoteModule,
     OpenAiModule,
+    AwsModule,
   ],
   controllers: [],
   providers: [],
