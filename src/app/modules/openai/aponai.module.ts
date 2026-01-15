@@ -3,7 +3,7 @@ import { OpenAiService } from './services/openai.service';
 import { SoapFormattingService } from './services/soap-formatting.service';
 import { TranscriptionService } from './services/transcription.service';
 
-@Global() // Torna disponível globalmente
+@Global()
 @Module({
     providers: [
         OpenAiService,

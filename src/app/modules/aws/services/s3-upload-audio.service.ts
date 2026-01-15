@@ -24,8 +24,6 @@ export class S3UploadAudioService {
 
         await this.awsService.getS3Client().send(command);
 
-        console.log(`https://${bucketName}.s3.${region}.amazonaws.com/${key}`)
-
         return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
     }
 }

@@ -121,13 +121,11 @@ export async function runSeed(dataSource: DataSource) {
 
     console.log('📝 Seeding notes...');
 
-    // Get all patients
     const allPatients = await patientRepository.find({
         order: { patientId: 'ASC' },
     });
 
     if (allPatients.length > 0) {
-        // First patient gets 7 notes
         const firstPatient = allPatients[0];
         const firstPatientNotesCount = await noteRepository.count({
             where: { patientId: firstPatient.id },
@@ -190,7 +188,6 @@ export async function runSeed(dataSource: DataSource) {
             console.log(`⏭️  Notes for ${firstPatient.name} already exist, skipping...`);
         }
 
-        // All other patients get 1 note each
         for (let i = 1; i < allPatients.length; i++) {
             const patient = allPatients[i];
             const patientNotesCount = await noteRepository.count({

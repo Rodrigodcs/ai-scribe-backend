@@ -23,15 +23,12 @@ export class SoapFormattingService {
 
         const rawContent = response.choices[0].message.content || text;
 
-        // Normalize the response to ensure it follows the exact format
         return this.normalizeSoapFormat(rawContent);
     }
 
     private normalizeSoapFormat(content: string): string {
-        // Remove any existing line breaks and normalize whitespace
         let normalized = content.trim();
 
-        // Split by lines and process each section
         const lines = normalized.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
         const sections: { [key: string]: string } = {
@@ -41,7 +38,6 @@ export class SoapFormattingService {
             'Plan': '',
         };
 
-        // Extract sections
         for (const line of lines) {
             for (const sectionName of Object.keys(sections)) {
                 if (line.startsWith(sectionName + ':') || line.startsWith(sectionName.toLowerCase() + ':')) {
@@ -52,37 +48,30 @@ export class SoapFormattingService {
             }
         }
 
-        // If we found structured sections, format them
         if (Object.values(sections).some(v => v !== '')) {
             return Object.entries(sections)
                 .map(([key, value]) => `${key}: ${value || 'Not specified'}`)
                 .join('\n');
         }
 
-        // If the response already follows the format, just clean it up
         const formatted = lines
             .map(line => {
-                // Ensure each line starts with a section name
                 if (line.match(/^(Subjective|Objective|Assessment|Plan):/i)) {
                     return line;
                 }
-                // If it doesn't start with a section, try to infer or skip
                 return null;
             })
             .filter(line => line !== null)
             .join('\n');
 
-        // If we have a valid format, return it
         if (formatted && formatted.split('\n').length >= 2) {
             return formatted;
         }
 
-        // Fallback: try to parse and reformat
         return this.parseAndReformat(content);
     }
 
     private parseAndReformat(content: string): string {
-        // Try to extract SOAP sections from various formats
         const subjectiveMatch = content.match(/(?:Subjective|S):\s*(.+?)(?=\n(?:Objective|O):|$)/is);
         const objectiveMatch = content.match(/(?:Objective|O):\s*(.+?)(?=\n(?:Assessment|A):|$)/is);
         const assessmentMatch = content.match(/(?:Assessment|A):\s*(.+?)(?=\n(?:Plan|P):|$)/is);
