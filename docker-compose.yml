@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ai-scribe-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai-scribe
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ai-scribe-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d ai-scribe" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-scribe-api
+    restart: always
+    env_file:
+      - .env.production
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: ${PORT:-8080}
+      NODE_ENV: ${NODE_ENV:-production}
+      TYPEORM_CONNECTION: ${TYPEORM_CONNECTION:-postgres}
+      TYPEORM_HOST: ${TYPEORM_HOST:-postgres}
+      TYPEORM_USERNAME: ${TYPEORM_USERNAME:-postgres}
+      TYPEORM_PASSWORD: ${TYPEORM_PASSWORD:-postgres}
+      TYPEORM_DATABASE: ${TYPEORM_DATABASE:-ai-scribe}
+      TYPEORM_PORT: ${TYPEORM_PORT:-5432}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ai-scribe-network
+
+volumes:
+  postgres_data:
+
+
+networks:
+  ai-scribe-network:
+    driver: bridge
