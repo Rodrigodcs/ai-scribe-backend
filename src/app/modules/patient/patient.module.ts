@@ -18,7 +18,7 @@ import { UpdatePatientService } from './services/update-patient.service';
         UpdatePatientService,
         RemovePatientService,
     ],
-    exports: [],
+    exports: [FindOnePatientService],
 })
 export class PatientModule { }
 

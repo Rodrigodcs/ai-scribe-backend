@@ -16,7 +16,7 @@ export class FindOnePatientService {
         });
 
         if (!patient) {
-            throw new NotFoundException(`Patient with ID ${id} not found`);
+            throw new NotFoundException(`Patient not found`);
         }
 
         return patient;

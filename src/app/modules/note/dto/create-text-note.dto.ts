@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
-export class CreateNoteDto {
+export class CreateTextNoteDto {
     @ApiProperty({
         description: 'Patient ID',
         example: '123e4567-e89b-12d3-a456-426614174000',
@@ -12,12 +12,12 @@ export class CreateNoteDto {
     patientId: string;
 
     @ApiPropertyOptional({
-        description: 'Text content (if input type is TEXT)',
+        description: 'Text content',
         example: 'Patient complains of headache and fever',
     })
-    @IsOptional()
     @IsString({ message: 'Text must be a string' })
     @Transform(({ value }) => value?.trim())
-    text?: string;
+    @IsNotEmpty({ message: 'Text is required' })
+    text: string;
 }
 
