@@ -1,6 +1,8 @@
 import { config } from 'dotenv';
 
-config();
+if (process.env.NODE_ENV !== 'production') {
+    config();
+}
 
 export const ApiConfig = {
     PORT: Number(process.env.PORT) ?? 8080,
