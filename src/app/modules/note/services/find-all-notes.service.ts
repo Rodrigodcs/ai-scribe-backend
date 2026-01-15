@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { PaginatedResponseDto } from '../../../../shared/dto/paginated-response.dto';
 import { FindAllNotesDto } from '../dto/find-all-notes.dto';
 import { Note } from '../entities/note.entity';
@@ -16,23 +16,35 @@ export class FindAllNotesService {
         const { search, page = 1, limit = 10, patientId } = findAllNotesDto;
         const skip = (page - 1) * limit;
 
-        const where: any = {};
+        const queryBuilder = this.noteRepository
+            .createQueryBuilder('note')
+            .leftJoinAndSelect('note.patient', 'patient')
+            .orderBy('note.createdAt', 'DESC');
 
         if (patientId) {
-            where.patientId = patientId;
+            queryBuilder.where('note.patientId = :patientId', { patientId });
         }
 
         if (search) {
-            where.content = ILike(`%${search.trim()}%`);
+            const searchTerm = `%${search.trim()}%`;
+            if (patientId) {
+                queryBuilder.andWhere(
+                    '(patient.name ILIKE :search)',
+                    { search: searchTerm }
+                );
+            } else {
+                queryBuilder.where(
+                    '(patient.name ILIKE :search)',
+                    { search: searchTerm }
+                );
+            }
         }
 
-        const [data, total] = await this.noteRepository.findAndCount({
-            where,
-            relations: ['patient'],
-            order: { createdAt: 'DESC' },
-            skip,
-            take: limit,
-        });
+        console.log(queryBuilder.getQueryAndParameters());
+        const [data, total] = await queryBuilder
+            .skip(skip)
+            .take(limit)
+            .getManyAndCount();
 
         const totalPages = Math.ceil(total / limit);
 
