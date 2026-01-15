@@ -2,12 +2,12 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { generateAudioFilename } from 'src/utils/generate-audio-filename';
 import { Repository } from 'typeorm';
+import { S3UploadAudioService } from '../../aws/services/s3-upload-audio.service';
 import { SoapFormattingService } from '../../openai/services/soap-formatting.service';
 import { TranscriptionService } from '../../openai/services/transcription.service';
 import { FindOnePatientService } from '../../patient/services/find-one-patient.service';
 import { CreateAudioNoteDto } from '../dto/create-audio-note.dto';
 import { InputType, Note } from '../entities/note.entity';
-import { S3UploadAudioService } from '../../aws/services/s3-upload-audio.service';
 
 @Injectable()
 export class CreateAudioNoteService {

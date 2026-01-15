@@ -24,7 +24,7 @@ export class S3DeleteAudioService {
 
             await this.awsService.getS3Client().send(command);
         } catch (error) {
-            throw new Error(`Failed to delete audio from S3: ${error.message}`);
+            console.error(`Failed to delete audio from S3: ${error.message}`);
         }
     }
 
