@@ -2,11 +2,12 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { generateAudioFilename } from 'src/utils/generate-audio-filename';
 import { Repository } from 'typeorm';
-import { S3UploadService } from '../../aws/services/s3-upload.service';
 import { SoapFormattingService } from '../../openai/services/soap-formatting.service';
 import { TranscriptionService } from '../../openai/services/transcription.service';
 import { InputType, Note } from '../entities/note.entity';
 import { FindOneNoteService } from './find-one-note.service';
+import { S3DeleteAudioService } from '../../aws/services/s3-delete-audio.service';
+import { S3UploadAudioService } from '../../aws/services/s3-upload-audio.service';
 
 @Injectable()
 export class UpdateAudioNoteService {
@@ -16,7 +17,8 @@ export class UpdateAudioNoteService {
         private readonly findOneNoteService: FindOneNoteService,
         private readonly transcriptionService: TranscriptionService,
         private readonly soapFormattingService: SoapFormattingService,
-        private readonly s3UploadService: S3UploadService,
+        private readonly s3UploadAudioService: S3UploadAudioService,
+        private readonly s3DeleteAudioService: S3DeleteAudioService,
     ) { }
 
     async run(id: string, file: { buffer: Buffer; mimetype: string } | undefined) {
@@ -32,14 +34,14 @@ export class UpdateAudioNoteService {
 
         const filename = generateAudioFilename(note.patient.name, file.mimetype);
 
-        const audioUrl = await this.s3UploadService.uploadAudio(
+        const audioUrl = await this.s3UploadAudioService.run(
             file.buffer,
             filename,
             file.mimetype,
         );
 
         if (note.audioUrl) {
-            await this.s3UploadService.deleteAudio(note.audioUrl);
+            await this.s3DeleteAudioService.run(note.audioUrl);
         }
 
         const transcription = await this.transcriptionService.transcribe(file.buffer);

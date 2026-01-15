@@ -1,35 +1,12 @@
-import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { AwsService } from './aws.service';
 
 @Injectable()
-export class S3UploadService {
+export class S3DeleteAudioService {
     constructor(private readonly awsService: AwsService) { }
 
-    async uploadAudio(
-        audioBuffer: Buffer,
-        filename: string,
-        contentType: string = 'audio/mpeg',
-    ): Promise<string> {
-        const key = `audios/${Date.now()}-${filename}`;
-        const bucketName = this.awsService.getBucketName();
-        const region = this.awsService.getRegion();
-
-        const command = new PutObjectCommand({
-            Bucket: bucketName,
-            Key: key,
-            Body: audioBuffer,
-            ContentType: contentType,
-        });
-
-        await this.awsService.getS3Client().send(command);
-
-        console.log(`https://${bucketName}.s3.${region}.amazonaws.com/${key}`)
-
-        return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
-    }
-
-    async deleteAudio(audioUrl: string): Promise<void> {
+    async run(audioUrl: string): Promise<void> {
         try {
             const key = this.extractKeyFromUrl(audioUrl);
 
